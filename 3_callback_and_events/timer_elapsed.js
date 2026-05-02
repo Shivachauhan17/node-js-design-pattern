@@ -19,6 +19,7 @@ function ticker(num, cb) {
     }
   }
 
+  //just giving time to handlers to be registered
   process.nextTick(play)
 
   return emitter;
