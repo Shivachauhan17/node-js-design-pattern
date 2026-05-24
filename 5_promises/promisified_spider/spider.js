@@ -5,9 +5,8 @@ import { saveFile } from "../../4_async_pattern_with_callbacks/cleaned_spider/sp
 import { getPageLinks } from "../../4_async_pattern_with_callbacks/spider_v2/utils.js";
 
 function spiderLinks(currentUrl, body, maxDepth) {
-  
   if (maxDepth === 1) {
-    return Promise.resolve()
+    return Promise.resolve();
   }
   const links = getPageLinks(currentUrl, body);
 
@@ -23,16 +22,15 @@ function spiderLinks(currentUrl, body, maxDepth) {
 export function download(url, filename) {
   console.log(`Downloading ${url} into ${filename}`);
 
-  return get(url).then((content) =>
+  return get(url).then((content) => {
     saveFile(filename, content, (err) => {
       if (err) throw Error("error in saveFile.");
-      return
-    }),
-  );
+    });
+    return content;
+  });
 }
 
 export function spider(url, maxDepth) {
-  
   const filename = urlToFileName(url);
 
   return exists(filename).then((alreadyExists) => {
@@ -45,11 +43,13 @@ export function spider(url, maxDepth) {
       });
     }
 
-    return download(url, filename).then((fileContent) => {
-      if (filename.endsWith(".html")) {
-        spiderLinks(url, fileContent, maxDepth);
-      }
-      return;
-    });
+    return download(url, filename)
+      .then((fileContent) => {
+        if (filename.endsWith(".html")) {
+          spiderLinks(url, fileContent, maxDepth);
+        }
+        return;
+      })
+      .catch((err) => console.log(err));
   });
 }
