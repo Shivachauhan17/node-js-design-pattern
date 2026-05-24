@@ -1,19 +1,20 @@
-import { urlToFileName } from "../../4_async_pattern_with_callbacks/spider/utils";
-import { exists } from "./utils";
+import { urlToFileName } from "../../4_async_pattern_with_callbacks/spider/utils.js";
+import { exists, get } from "./utils.js";
 import { readFile } from "node:fs/promises";
+import { saveFile } from "../../4_async_pattern_with_callbacks/cleaned_spider/spider.js";
+import { getPageLinks } from "../../4_async_pattern_with_callbacks/spider_v2/utils.js";
 
 function spiderLinks(currentUrl, body, maxDepth) {
-  let promise = Promise.resolve();
-  if (maxDepth === 0) {
-    return promise;
+  console.debug(`spiderLinks(${currentUrl}, ${maxDepth})`)
+  if (maxDepth === 1) {
+    return;
   }
   const links = getPageLinks(currentUrl, body);
 
-  for (const link of links) {
-    promise = promise.then(() => spider(link, maxDepth - 1));
-  }
-
-  return promise;
+  return links.reduce(
+    (prev, link) => prev.then(() => spider(link, maxDepth - 1)),
+    Promise.resolve(),
+  );
 }
 
 //returning promise chain to the caller
@@ -22,10 +23,16 @@ function spiderLinks(currentUrl, body, maxDepth) {
 export function download(url, filename) {
   console.log(`Downloading ${url} into ${filename}`);
 
-  return get(url).then((content) => saveFile(filename, content));
+  return get(url).then((content) =>
+    saveFile(filename, content, (err) => {
+      if (err) throw Error("error in saveFile.");
+      return
+    }),
+  );
 }
 
 export function spider(url, maxDepth) {
+  console.debug(`spider(${url}, ${maxDepth})`)
   const filename = urlToFileName(url);
 
   return exists(filename).then((alreadyExists) => {
@@ -42,7 +49,7 @@ export function spider(url, maxDepth) {
       if (filename.endsWith(".html")) {
         spiderLinks(url, fileContent, maxDepth);
       }
-      return
+      return;
     });
   });
 }

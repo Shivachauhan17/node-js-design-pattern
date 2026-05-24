@@ -2,7 +2,7 @@ import { exists, recursiveMkdir, urlToFileName, get } from "../spider/utils.js";
 import { writeFile } from "node:fs";
 import { dirname } from "node:path";
 
-function saveFile(filename, content, cb) {
+export function saveFile(filename, content, cb) {
   recursiveMkdir(dirname(filename), (err) => {
     if (err) {
       return cb(err);
