@@ -3,6 +3,7 @@ import { delayError } from "./delayError.js";
 
 async function erroNotCaught(){
     try{
+        return await delayError(1000)
         return delayError(1000)
     }
     catch(err){

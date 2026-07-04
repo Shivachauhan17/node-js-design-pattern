@@ -21,8 +21,11 @@ export class LazyPromise extends Promise {
   #ensureInit() {
     if (!this.#promise) {
       this.#promise = new Promise(this.#executor);
+      //when this newly created promise executes the executor on the basis of that
+      //then it's fullfillment or rejection value will fullfill or reject the LazyPromise instance
+      //using it's prestored resolve and reject
       this.#promise.then(
-        (v) => this.#resolve(v),
+        (v) => this.#resolve(v), //triggers on fullfilled of the LazyPromise instance
         (e) => this.#reject(e),
       );
     }
